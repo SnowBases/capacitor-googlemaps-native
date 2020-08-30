@@ -4,6 +4,9 @@ package com.hemangkumar.capacitorgooglemaps;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -14,6 +17,7 @@ import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
@@ -27,6 +31,8 @@ import com.google.android.libraries.maps.GoogleMapOptions;
 import com.google.android.libraries.maps.MapView;
 import com.google.android.libraries.maps.OnMapReadyCallback;
 import com.google.android.libraries.maps.UiSettings;
+import com.google.android.libraries.maps.model.BitmapDescriptor;
+import com.google.android.libraries.maps.model.BitmapDescriptorFactory;
 import com.google.android.libraries.maps.model.CameraPosition;
 import com.google.android.libraries.maps.model.CircleOptions;
 import com.google.android.libraries.maps.model.LatLng;
@@ -36,6 +42,7 @@ import com.google.android.libraries.maps.model.MarkerOptions;
 import com.google.android.libraries.maps.model.PointOfInterest;
 import com.google.android.libraries.maps.model.PolygonOptions;
 import com.google.android.libraries.maps.model.PolylineOptions;
+import com.hemangkumar.capacitorgooglemaps.capacitorgooglemaps.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -175,6 +182,7 @@ public class CapacitorGoogleMaps extends Plugin implements OnMapReadyCallback {
         final String title = call.getString("title", "");
         final String snippet = call.getString("snippet", "");
         final Boolean isFlat = call.getBoolean("isFlat", true);
+        // final String icon = call.getString("icon", "");
 
         getBridge().getActivity().runOnUiThread(new Runnable() {
             @Override
@@ -186,6 +194,7 @@ public class CapacitorGoogleMaps extends Plugin implements OnMapReadyCallback {
                 markerOptions.title(title);
                 markerOptions.snippet(snippet);
                 markerOptions.flat(isFlat);
+                markerOptions.icon(bitmapDescriptorFromVector(R.drawable.ic_pickup));
                 googleMap.addMarker(markerOptions);
             }
         });
@@ -692,6 +701,16 @@ public class CapacitorGoogleMaps extends Plugin implements OnMapReadyCallback {
         final float scale = getBridge().getActivity().getResources().getDisplayMetrics().density;
         // Convert the dps to pixels, based on density scale
         return (int) (pixels * scale + 0.5f);
+    }
+
+    private BitmapDescriptor bitmapDescriptorFromVector(int vectorResId) {
+        Context ctx = getBridge().getContext();
+        Drawable vectorDrawable = ResourcesCompat.getDrawable(ctx.getResources(), vectorResId, null);
+        vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
+        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 
 }
